@@ -372,7 +372,7 @@ pub struct TreatyEvent {
 
 /// Append-only, hash-chained treaty record. Both parties can keep the
 /// same book and verify it offline — consent history is not mutable.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TreatyBook {
     pub treaties: Vec<Treaty>,
     pub revocations: Vec<Revocation>,
