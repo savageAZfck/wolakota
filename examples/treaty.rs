@@ -14,7 +14,9 @@ fn main() {
         &bob.public_key(),
         vec![
             Scope::ShareDreams,
-            Scope::Inference { model: "qwen3-4b".into() },
+            Scope::Inference {
+                model: "qwen3-4b".into(),
+            },
         ],
         "nightly dream exchange + delegated 4b inference",
         86_400 * 90,
@@ -28,11 +30,16 @@ fn main() {
     println!("ratified — state: {:?}", book.state(&treaty.id, 0));
 
     // Invocations record the use of consent, not just the grant.
-    book.record_invocation(&treaty.id, &Scope::ShareDreams, 0).unwrap();
+    book.record_invocation(&treaty.id, &Scope::ShareDreams, 0)
+        .unwrap();
 
     // Either party can leave. Consent you can't withdraw is a cage.
     let rev = Revocation::issue(&bob, &treaty, "offboarding for the season");
     book.apply_revocation(rev).unwrap();
     println!("post-revocation state: {:?}", book.state(&treaty.id, 0));
-    println!("chain verifies: {} ({} events)", book.verify_chain(), book.events.len());
+    println!(
+        "chain verifies: {} ({} events)",
+        book.verify_chain(),
+        book.events.len()
+    );
 }

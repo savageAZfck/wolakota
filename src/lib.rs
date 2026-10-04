@@ -120,9 +120,10 @@ fn verify(pub_hex: &str, payload: &BTreeMap<String, Value>, sig_hex: &str) -> bo
     let (Ok(pk_bytes), Ok(sig_bytes)) = (hex::decode(pub_hex), hex::decode(sig_hex)) else {
         return false;
     };
-    let (Ok(pk_arr), Ok(sig_arr)): (Result<[u8; 32], _>, Result<[u8; 64], _>) =
-        (pk_bytes.try_into().map_err(|_| ()), sig_bytes.try_into().map_err(|_| ()))
-    else {
+    let (Ok(pk_arr), Ok(sig_arr)): (Result<[u8; 32], _>, Result<[u8; 64], _>) = (
+        pk_bytes.try_into().map_err(|_| ()),
+        sig_bytes.try_into().map_err(|_| ()),
+    ) else {
         return false;
     };
     let Ok(vk) = VerifyingKey::from_bytes(&pk_arr) else {
@@ -219,7 +220,11 @@ impl Treaty {
         m.insert("counterparty".into(), json!(self.counterparty));
         m.insert(
             "scopes".into(),
-            json!(self.scopes.iter().map(|s| s.canonical()).collect::<Vec<_>>()),
+            json!(self
+                .scopes
+                .iter()
+                .map(|s| s.canonical())
+                .collect::<Vec<_>>()),
         );
         m.insert("terms".into(), json!(self.terms));
         m.insert("created_at".into(), json!(self.created_at));
@@ -237,7 +242,11 @@ impl Treaty {
         m.insert("counterparty".into(), json!(self.counterparty));
         m.insert(
             "scopes".into(),
-            json!(self.scopes.iter().map(|s| s.canonical()).collect::<Vec<_>>()),
+            json!(self
+                .scopes
+                .iter()
+                .map(|s| s.canonical())
+                .collect::<Vec<_>>()),
         );
         m.insert("terms".into(), json!(self.terms));
         m.insert("created_at".into(), json!(self.created_at));
@@ -376,7 +385,10 @@ impl TreatyBook {
     }
 
     fn chain_tip(&self) -> String {
-        self.events.last().map(|e| e.hash.clone()).unwrap_or_else(|| "genesis".into())
+        self.events
+            .last()
+            .map(|e| e.hash.clone())
+            .unwrap_or_else(|| "genesis".into())
     }
 
     fn append(&mut self, kind: &str, treaty_id: &str, body: &BTreeMap<String, Value>) {
@@ -400,8 +412,14 @@ impl TreatyBook {
 
     /// Record a proposal. The treaty enters as Proposed.
     pub fn record_proposal(&mut self, treaty: Treaty) -> Result<(), Error> {
-        if !verify(&treaty.initiator, &treaty.signed_body(), &treaty.initiator_sig) {
-            return Err(Error::BadSignature("proposal not signed by initiator".into()));
+        if !verify(
+            &treaty.initiator,
+            &treaty.signed_body(),
+            &treaty.initiator_sig,
+        ) {
+            return Err(Error::BadSignature(
+                "proposal not signed by initiator".into(),
+            ));
         }
         if self.treaties.iter().any(|t| t.id == treaty.id) {
             return Err(Error::BadTreaty("duplicate treaty id".into()));
@@ -492,8 +510,10 @@ impl TreatyBook {
             if ev.seq != i as u64 {
                 return false;
             }
-            let preimage =
-                format!("{prev}:{}:{}:{}:{}:{}", ev.seq, ev.kind, ev.treaty_id, ev.body_hash, ev.ts);
+            let preimage = format!(
+                "{prev}:{}:{}:{}:{}:{}",
+                ev.seq, ev.kind, ev.treaty_id, ev.body_hash, ev.ts
+            );
             if ev.hash != sha256_hex(preimage.as_bytes()) {
                 return false;
             }

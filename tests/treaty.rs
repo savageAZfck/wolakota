@@ -36,8 +36,7 @@ fn ratify_by_wrong_party_fails() {
 fn either_party_revokes() {
     let (alice, bob) = parties();
     let mut book = TreatyBook::new();
-    let mut treaty =
-        Treaty::propose(&alice, &bob.public_key(), vec![Scope::ShareDreams], "t", 0);
+    let mut treaty = Treaty::propose(&alice, &bob.public_key(), vec![Scope::ShareDreams], "t", 0);
     book.record_proposal(treaty.clone()).unwrap();
     treaty.ratify(&bob).unwrap();
     book.apply_ratification(treaty.clone()).unwrap();
@@ -54,8 +53,7 @@ fn outsider_revocation_denied() {
     let (alice, bob) = parties();
     let eve = Identity::generate();
     let mut book = TreatyBook::new();
-    let mut treaty =
-        Treaty::propose(&alice, &bob.public_key(), vec![Scope::ShareDreams], "t", 0);
+    let mut treaty = Treaty::propose(&alice, &bob.public_key(), vec![Scope::ShareDreams], "t", 0);
     book.record_proposal(treaty.clone()).unwrap();
     treaty.ratify(&bob).unwrap();
     book.apply_ratification(treaty.clone()).unwrap();
@@ -81,10 +79,17 @@ fn invocation_requires_active_and_granted_scope() {
     book.apply_ratification(treaty.clone()).unwrap();
 
     // Granted scope records.
-    book.record_invocation(&treaty.id, &Scope::ShareDreams, now()).unwrap();
+    book.record_invocation(&treaty.id, &Scope::ShareDreams, now())
+        .unwrap();
     // Ungranted scope denies.
     assert!(book
-        .record_invocation(&treaty.id, &Scope::Read { resource: "ledger".into() }, now())
+        .record_invocation(
+            &treaty.id,
+            &Scope::Read {
+                resource: "ledger".into()
+            },
+            now()
+        )
         .is_err());
     assert!(book.verify_chain());
 }
@@ -92,8 +97,7 @@ fn invocation_requires_active_and_granted_scope() {
 #[test]
 fn expired_treaty_is_inactive() {
     let (alice, bob) = parties();
-    let mut treaty =
-        Treaty::propose(&alice, &bob.public_key(), vec![Scope::ShareDreams], "t", 60);
+    let mut treaty = Treaty::propose(&alice, &bob.public_key(), vec![Scope::ShareDreams], "t", 60);
     treaty.ratify(&bob).unwrap();
     let ratified = treaty.ratified_at.unwrap();
     assert_eq!(treaty.state(ratified + 30), TreatyState::Active);
@@ -104,8 +108,7 @@ fn expired_treaty_is_inactive() {
 fn chain_detects_tampering() {
     let (alice, bob) = parties();
     let mut book = TreatyBook::new();
-    let mut treaty =
-        Treaty::propose(&alice, &bob.public_key(), vec![Scope::ShareDreams], "t", 0);
+    let mut treaty = Treaty::propose(&alice, &bob.public_key(), vec![Scope::ShareDreams], "t", 0);
     book.record_proposal(treaty.clone()).unwrap();
     treaty.ratify(&bob).unwrap();
     book.apply_ratification(treaty).unwrap();
