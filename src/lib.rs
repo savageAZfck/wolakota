@@ -283,11 +283,11 @@ impl Treaty {
             return TreatyState::Expired;
         }
         if !verify(&self.initiator, &self.signed_body(), &self.initiator_sig) {
-            return TreatyState::Void("initiator signature failed".into());
+            return TreatyState::Void("initiator signature failed");
         }
         let cp_sig = self.counterparty_sig.as_deref().unwrap_or_default();
         if !verify(&self.counterparty, &self.signed_body(), cp_sig) {
-            return TreatyState::Void("counterparty signature failed".into());
+            return TreatyState::Void("counterparty signature failed");
         }
         TreatyState::Active
     }
@@ -325,7 +325,7 @@ pub struct Revocation {
 
 impl Revocation {
     /// Issue a revocation. `signer` must be a treaty party — enforcement
-    /// happens in [`TreatyBook::apply`], which checks the signature and
+    /// happens in [`TreatyBook::apply_revocation`], which checks the signature and
     /// membership together.
     pub fn issue(signer: &Identity, treaty: &Treaty, reason: &str) -> Self {
         let mut r = Self {

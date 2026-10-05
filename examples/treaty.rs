@@ -1,4 +1,4 @@
-use wolakota::{Identity, Revocation, Scope, Treaty, TreatyBook, TreatyState};
+use wolakota::{Identity, Revocation, Scope, Treaty, TreatyBook};
 
 fn main() {
     // Two organisms, two owner keys — a federation of peers, not a
